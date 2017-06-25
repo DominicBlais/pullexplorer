@@ -61,8 +61,6 @@ function setStatusAndGetDataChunk(conf, url, callback) {
     }
 }
 
-
-
 function getAllDataAtUrl(url, callback) {
     if (IS_LOADING) {
         return;
@@ -86,11 +84,11 @@ function getAllDataAtUrl(url, callback) {
     }, 1);
 }
 
-
 angular.module('pullorerApp', []).controller('PullorerController', ['$scope',
     function ($scope) {
         $scope.org = {name:'', repo:''};
         $scope.repo = [{name:''}];
+        $scope.pulls = [];
 
         $scope.loadRepos = function() {
             var url = 'https://api.github.com/orgs/' + encodeURIComponent($scope.org.name.trim()) + '/repos';
@@ -116,6 +114,23 @@ angular.module('pullorerApp', []).controller('PullorerController', ['$scope',
     }
 ]);
 
+var consoleSrc ='<input value="data" type="text" onkeyup="event.keyCode == 13 ? updateConsole(this) : false"></input><br/><pre id="console-out">abc&nbsp;</pre>';
+
+function updateConsole(elem) {
+    var pulls = angular.element($('#ctrl')).scope().pulls;
+    var res = eval($(elem).val());
+    $('#console-output').text(JSON.stringify(res, null, 2));
+    return true;
+}
+
+function toggleConsole() {
+    $('#console-input').toggle();
+    $('#console-output').toggle();
+}
+
 $(function() {
     $('#loading').hide();
+    $('#console-input').hide()
+    $('#console-output').hide()
 });
+

@@ -64,6 +64,11 @@
           </table>
         </div>
       </div>
+      <div id="console">
+        <button id="console-button" type="button" class="btn btn-info" onclick="toggleConsole()">Toggle Console</button>
+        <input id="console-input" type="text" onkeyup="event.keyCode == 13 ? updateConsole(this) : false" value="pulls.filter(function(x) { return x.merged_at != null; })" />
+        <pre id="console-output"></pre>
+      </div>
     </div>
     <div id="loading">&nbsp;</div>
 
