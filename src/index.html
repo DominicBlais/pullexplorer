@@ -9,10 +9,36 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
   </head>
   <body id="ctrl" ng-controller="PullorerController">
+    <div class="loading" style="visibility:hidden"></div>
     <div class="container-fluid">
       <h1>Github Pull Explorer</h1>
+        <p id="status">&nbsp;</p>
+        <div class="row">
+        <div class="input-group">
+          <span class="input-group-addon" id="org-name-label">Organization Name</span>
+          <input type="text" class="form-control" placeholder="e.g. lodash" aria-describedby="org-name-label" ng-model-options="{updateOn: 'change blur'}" ng-change="loadRepos()" ng-model="org.name" required=required onchange="" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-group">
+          <div class="input-group-btn">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="!org.name.trim()" id="dropdownMenuButton">
+              Choose Repository...
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <li ng-repeat="repo in repos">
+                <a class="dropdown-item" href="#" onclick="setRepoTo(this.innerHTML)">{{repo.name}}</a>
+              </li>
+            </ul>
+          </div>
+          <input id="org-name" type="text" class="form-control" ng-model-options="{updateOn: 'change blur'}" ng-change="loadPulls()" ng-model="org.repo" required=required ng-disabled="!org.name.trim()" placeholder="Repository name..." />
+        </div>
+      </div>
+
     </div>
-    
+
+
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>    
