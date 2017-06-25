@@ -40,6 +40,9 @@ function setStatusAndGetDataChunk(conf, url, callback) {
                 }
                 conf.data.push.apply(conf.data, JSON.parse(resp.responseText));
                 $('#status').text('Loading data (' + Math.round(conf.nextPage / conf.lastPage * 100) + '%)...');  
+                if (url.indexOf('/pulls?state=all') > 0) {  // xxx code smell
+                    $('#pull-count').text('Pulls (' + conf.data.length + ') - Click to Select');
+                }
             } else {
                 alert("Error contacting GitHub: " + resp.responseText);
                 conf.nextPage = -1; // break
@@ -52,6 +55,7 @@ function setStatusAndGetDataChunk(conf, url, callback) {
             setStatusAndGetDataChunk(conf, url, callback);
         }, 1);
     } else {
+        IS_LOADING = false;
         $('#loading').hide();
         callback(conf);
     }
@@ -87,16 +91,31 @@ angular.module('pullorerApp', []).controller('PullorerController', ['$scope',
     function ($scope) {
         $scope.org = {name:'', repo:''};
         $scope.repo = [{name:''}];
+
         $scope.loadRepos = function() {
             var url = 'https://api.github.com/orgs/' + encodeURIComponent($scope.org.name.trim()) + '/repos';
             getAllDataAtUrl(url, function(conf) {
-                $scope.repos = conf.data;
+                $scope.$apply(function() {
+                    $scope.repos = conf.data;
+                });
             });
         };  
 
         $scope.loadPulls = function() {
-            // tbd
+            var url = 'https://api.github.com/repos/' + encodeURIComponent($scope.org.name.trim()) + '/' + encodeURIComponent($scope.org.repo) + '/pulls?state=all';
+            getAllDataAtUrl(url, function(conf) {
+                $scope.$apply(function() {
+                    $scope.pulls = conf.data;
+                });
+            });
+        };
+
+        $scope.setPull = function(idx) {
+            $scope.pull = $scope.pulls[idx];
         };
     }
 ]);
 
+$(function() {
+    $('#loading').hide();
+});

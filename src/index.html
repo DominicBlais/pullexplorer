@@ -9,7 +9,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
   </head>
   <body id="ctrl" ng-controller="PullorerController">
-    <div class="loading" style="visibility:hidden"></div>
     <div class="container-fluid">
       <h1>Github Pull Explorer</h1>
         <p id="status">&nbsp;</p>
@@ -35,9 +34,38 @@
         </div>
       </div>
 
+      <div class="row">
+        <div class="col">
+          <table class="table table-responsive" id="pull-table">
+            <tr>
+              <th id="pull-count"></th>
+            </tr>
+            <tr ng-repeat="p in pulls">
+              <td ng-click="setPull($index)">#{{p.number}}, Created ({{p.created_at.substring(0, 10)}}) by {{p.user.login}}<br/>Status: {{p.state.toUpperCase()}} <em ng-if="p.merged_at">&mdash; Merged on {{p.merged_at.substring(0, 10)}}</em></td>
+            </tr>
+          </table> 
+        </div>
+        <div class="col">
+          <table class="table table-responsive" ng-if="pull">
+            <tr><th>Pull #</th><td><a href="{{pull.html_url}}" target="_blank">{{pull.number}}</a></td></tr>
+            <tr><th>Created At:</th><td>{{pull.created_at.substring(0, 10)}}</td></tr>
+            <tr><th>State:</th><td>{{pull.state.toUpperCase()}}</td></tr>
+            <tr ng-if="pull.closed_at"><th>Closed At:</th><td>{{pull.closed_at.substring(0, 10)}}</td></tr>
+            <tr><th>Title:</th><td>{{pull.title}}</td></tr>
+            <tr>
+              <th>Merged?</th>
+              <td ng-if="pull.merged_at">Yes, at {{pull.merged_at.substring(0, 10)}}</td>
+              <td ng-if="!pull.merged_at">no</td>
+            </tr>
+            <tr><th>User:</th><td><a target="_blank" href="{{pull.user.url}}"><img width="64" height="64" ng-src="{{pull.user.avatar_url}}" /> {{pull.user.login}}</td></tr>
+            <tr><th>Patch:</th><td><a target="_blank" href="{{pull.patch_url}}">link</a></td></tr>
+            <tr><th>Body:</th><td><textarea readonly=readonly>{{pull.body}}</textarea></td></tr>
+            <tr><th>Raw Record:</th><td><textarea readonly=readonly>{{pull}}</textarea></td></tr>
+          </table>
+        </div>
+      </div>
     </div>
-
-
+    <div id="loading">&nbsp;</div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
