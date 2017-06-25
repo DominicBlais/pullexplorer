@@ -1,8 +1,6 @@
-/* GitHub Pull Explorer Application Code
+/*
+   GitHub Pull Explorer Application Code
    https://github.com/DominicBlais/pullexplorer for more info
-
-   Notes:
-     TBD
  */
 
 var nextPageRegex = new RegExp('&page=([1-9][0-9]*)>; rel="next"');
@@ -13,8 +11,7 @@ function setRepoTo(repoName) {
     angular.element($('#org-name').val(repoName)).triggerHandler('change');
 }
 
-
-/* conf is {nextPage:int, lastPage:int, data:[]} */
+/* conf is {nextPage:int, lastPage:int, data:[], break:false} */
 function setStatusAndGetDataChunk(conf, url, callback) {
     $.ajax({
         type: 'GET',
@@ -25,7 +22,7 @@ function setStatusAndGetDataChunk(conf, url, callback) {
             if (resp.status == 200) {
                 var link = resp.getResponseHeader('Link');
                 if (link == null) {
-                    conf.nextPage = -1;
+                    conf.break = true;
                 } else {
                     if (conf.lastPage < 1) {
                         var m = link.match(lastPageRegex);
@@ -36,6 +33,8 @@ function setStatusAndGetDataChunk(conf, url, callback) {
                     var m = link.match(nextPageRegex);
                     if (m != null) {
                         conf.nextPage = parseInt(m[1]);
+                    } else {
+                        conf.break = true;
                     }
                 }
                 conf.data.push.apply(conf.data, JSON.parse(resp.responseText));
@@ -44,12 +43,12 @@ function setStatusAndGetDataChunk(conf, url, callback) {
                     $('#pull-count').text('Pulls (' + conf.data.length + ') - Click to Select');
                 }
             } else {
-                alert("Error contacting GitHub: " + resp.responseText);
-                conf.nextPage = -1; // break
+                alert("Error contacting GitHub: " + resp.status + " " + resp.responseText);
+                conf.break = true; // break
             }
         }
     });
-    if (conf.lastPage > 1 && conf.nextPage < conf.lastPage) {
+    if (!conf.break && conf.nextPage <= conf.lastPage) {
         // relinquishing control to UI to update status
         setTimeout(function() {
             setStatusAndGetDataChunk(conf, url, callback);
@@ -76,7 +75,8 @@ function getAllDataAtUrl(url, callback) {
     var conf = {
         data:[],
         nextPage:1,
-        lastPage:-1
+        lastPage:-1,
+        break:false
     };
     $('#status').text('Loading data (0%)...');
     setTimeout(function() {
@@ -113,8 +113,6 @@ angular.module('pullorerApp', []).controller('PullorerController', ['$scope',
         };
     }
 ]);
-
-var consoleSrc ='<input value="data" type="text" onkeyup="event.keyCode == 13 ? updateConsole(this) : false"></input><br/><pre id="console-out">abc&nbsp;</pre>';
 
 function updateConsole(elem) {
     var pulls = angular.element($('#ctrl')).scope().pulls;
