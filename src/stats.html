@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="pullorerApp">
+  <head>
+    <title>Github Pull Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8"/> 
+  </head>
+  <body>
+    <table id="content"></table>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+var pulls = [];
+
+var msInWeek = 60 * 60 * 24 * 7 * 1000;
+var msInDays = msInWeek / 7;
+var startWeek = new Date(2012, 0, 0, 0, 0);
+var weekData = [];
+var weekMergeCount = {};
+
+function getPRsMerged() {
+  var merged = pulls.filter(x => x.merged_at != null);
+  return merged;
+/*
+  var dates = merged.map(x => Date.parse(x.merged_at));
+
+  console.log(getWeeksAgo(Date.now()));
+  console.log(getWeeksAgo(dates[0]) + ' ' + new Date(dates[0]));*/
+  return merged;
+}
+
+function getWeeksAgo(d) {
+  return Math.ceil((d - startWeek) / msInWeek);
+}
+
+$(function() {
+  for (var i = 0; i < getWeeksAgo(Date.now()); i++) {
+    weekData[i] = {
+      mergeCount:0,
+      createToMergeTimes:[],
+      commitToMergeTimes:[]
+    }
+  }
+    $.get({url:'local.json', success:function(data, status) {
+      pulls = data;
+      var merged = getPRsMerged();
+      for (m of merged) {
+        var mergedAt = Date.parse(m.merged_at);
+        var weeksAgo = getWeeksAgo(mergedAt);
+        weekData[weeksAgo].mergeCount += 1;
+        weekData[weeksAgo].createToMergeTimes.push(mergedAt - Date.parse(m.created_at));
+        // commits_url https://api.github.com/repos/lodash/lodash/pulls/3166/commits
+        //weekData[weeksAgo].commitToMergeTimes.push(m.merged_at - m.created_at);
+      }
+      render();
+    }});
+});
+
+function render() {
+  var s = '<tr><th>Week # (Date)</th><th># Merged</th><th>Creation to Merge Avg</th><th>Creation to Merge Med</th><th>First Commit to Merge Avg</th><th>First Commit to Merge Med</th></tr>';
+  for (var i = 0; i < weekData.length; i++) {
+    var week = weekData[i];
+    console.log(week);
+    var dateString = new Date(startWeek.getTime() + (i * msInWeek)).toDateString(); 
+    s += '<tr><td><em>' + (i+1) + '</em> (' + dateString + ')</td>';
+    s += '<td>' + week.mergeCount + '</td>';
+    var x = 0;
+    if (week.createToMergeTimes.length > 0) {
+      x = week.createToMergeTimes.reduce((a,b) => a + b) / week.createToMergeTimes.length / msInDays;
+    }
+    s += '<td>' + x + '</td>';
+    s += '</tr>'
+  }
+  $('#content').html(s);
+}
+    </script>  
+  </body>
+</html>
